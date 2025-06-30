@@ -23,4 +23,15 @@
             channel_id
         FROM live_subscription
     </select>
+
+    <select id="selectLiveSubscriptionByChannelId" parameterType="map" resultType="map">
+        SELECT DISTINCT ON (ls.guild_id)
+            ls.guild_id,
+            lac.channel_id
+        FROM live_subscription ls
+                 JOIN live_alarm_channel lac ON ls.guild_id = lac.guild_id
+                JOIN chzzk_live_status cls ON ls.channel_id = cls.channel_id
+        WHERE ls.channel_id = #{channelId}
+        ORDER BY ls.guild_id, lac.channel_id
+    </select>
 </mapper>

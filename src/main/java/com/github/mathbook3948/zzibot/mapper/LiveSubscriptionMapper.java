@@ -4,6 +4,7 @@ import com.github.mathbook3948.zzibot.dto.zzibot.LiveSubscription;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface LiveSubscriptionMapper {
@@ -13,4 +14,6 @@ public interface LiveSubscriptionMapper {
     List<LiveSubscription> selectLiveSubscriptionWithGuildID(LiveSubscription params) throws Exception;
 
     List<String> selectLiveSubscriptionDistinct() throws Exception;
+
+    List<Map<String, Object>> selectLiveSubscriptionByChannelId(Map<String, Object> params) throws Exception;
 }

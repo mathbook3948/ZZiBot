@@ -32,7 +32,7 @@ public class ChzzkService {
                         .forJob(jobDetail)
                         .withIdentity("trigger_" + channelId, "liveGroup")
                         .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-                                .withIntervalInSeconds(30)
+                                .withIntervalInSeconds(120)
                                 .repeatForever())
                         .build();
 

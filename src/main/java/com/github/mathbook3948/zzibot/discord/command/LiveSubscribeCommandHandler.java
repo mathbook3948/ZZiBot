@@ -2,18 +2,25 @@ package com.github.mathbook3948.zzibot.discord.command;
 
 import com.github.mathbook3948.zzibot.dto.zzibot.LiveSubscription;
 import com.github.mathbook3948.zzibot.exception.LiveSubscriptionLimitExceededException;
+import com.github.mathbook3948.zzibot.job.CheckChzzkLiveStatusJob;
 import com.github.mathbook3948.zzibot.mapper.LiveSubscriptionMapper;
 import com.github.mathbook3948.zzibot.util.ChzzkUtil;
+import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
+import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.core.object.entity.channel.MessageChannel;
 import jakarta.annotation.PostConstruct;
+import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.net.URI;
 import java.util.List;
@@ -29,6 +36,13 @@ public class LiveSubscribeCommandHandler {
     @Autowired
     private LiveSubscriptionMapper liveSubscriptionMapper;
 
+    @Autowired
+    private Scheduler scheduler;
+
+    @Autowired
+    @Lazy
+    private LiveSubscribeCommandHandler self;
+
     @PostConstruct
     public void register() {
         client.on(ChatInputInteractionEvent.class)
@@ -38,36 +52,12 @@ public class LiveSubscribeCommandHandler {
     }
 
     private Mono<Void> handle(ChatInputInteractionEvent event) {
-        String url = event.getOption("url")
-                .flatMap(ApplicationCommandInteractionOption::getValue)
-                .map(val -> val.asString())
-                .orElse(null);
-
-        if (url == null || url.isBlank()) {
-            return event.reply()
-                    .withEphemeral(true)
-                    .withContent("URL이 필요합니다.");
-        }
-
         return event.getInteraction().getChannel()
                 .ofType(MessageChannel.class)
                 .flatMap(channel -> {
                     String message = "";
-
                     try {
-                        String guildId = event.getInteraction().getGuildId().map(id -> id.asString()).orElse(null);
-
-                        String channelId = ChzzkUtil.extractChannelIdFromUrl(url);
-
-                        LiveSubscription ls = LiveSubscription.builder().guildId(guildId).channelId(channelId).build();
-
-                        List<LiveSubscription> list = liveSubscriptionMapper.selectLiveSubscriptionWithGuildID(ls);
-
-                        if(list.size() >= 5) {
-                            throw new LiveSubscriptionLimitExceededException(null);
-                        }
-
-                        liveSubscriptionMapper.insertLiveSubscription(ls);
+                        self.handletransactional(event);
 
                         message = "구독에 성공하였습니다.";
                     } catch (LiveSubscriptionLimitExceededException lslee) {
@@ -83,4 +73,55 @@ public class LiveSubscribeCommandHandler {
                 }).then();
     }
 
+    @Transactional
+    public void handletransactional(ChatInputInteractionEvent event) throws Exception {
+        String url = event.getOption("url")
+                .flatMap(ApplicationCommandInteractionOption::getValue)
+                .map(ApplicationCommandInteractionOptionValue::asString)
+                .orElse(null);
+
+        String guildId = event.getInteraction().getGuildId().map(Snowflake::asString).orElse(null);
+
+        String channelId = ChzzkUtil.extractChannelIdFromUrl(url);
+
+        LiveSubscription ls = LiveSubscription.builder().guildId(guildId).channelId(channelId).build();
+
+        List<LiveSubscription> list = liveSubscriptionMapper.selectLiveSubscriptionWithGuildID(ls);
+
+        if (list.size() >= 5) {
+            throw new LiveSubscriptionLimitExceededException(null);
+        }
+
+        liveSubscriptionMapper.insertLiveSubscription(ls);
+        registerJob(channelId);
+    }
+
+    private void registerJob(String channelId) {
+        Mono.fromRunnable(() -> {
+            try {
+                JobKey jobKey = JobKey.jobKey("job_" + channelId, "liveGroup");
+                if (scheduler.checkExists(jobKey)) return;
+
+                JobDataMap dataMap = new JobDataMap();
+                dataMap.put("channelId", channelId);
+
+                JobDetail jobDetail = JobBuilder.newJob(CheckChzzkLiveStatusJob.class)
+                        .withIdentity(jobKey)
+                        .usingJobData(dataMap)
+                        .build();
+
+                Trigger trigger = TriggerBuilder.newTrigger()
+                        .forJob(jobDetail)
+                        .withIdentity("trigger_" + channelId, "liveGroup")
+                        .withSchedule(SimpleScheduleBuilder.simpleSchedule()
+                                .withIntervalInSeconds(120)
+                                .repeatForever())
+                        .build();
+
+                scheduler.scheduleJob(jobDetail, trigger);
+            } catch (Exception e) {
+                logger.error("Job 등록 실패: {}", e.getMessage());
+            }
+        }).subscribeOn(Schedulers.boundedElastic()).subscribe();
+    }
 }
