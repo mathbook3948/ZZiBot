@@ -26,6 +26,7 @@ public class CommandRegistrar {
     @PostConstruct
     public void registerPingCommand() {
         registerLiveSubscription();
+        registerSetChannel();
     }
 
     private void registerLiveSubscription() {
@@ -53,4 +54,20 @@ public class CommandRegistrar {
                 .block();
     }
 
+    private void registerSetChannel() {
+        Map<String, Object> command = Map.of(
+                "name", "set-channel",
+                "description", "이 채널을 봇 기본 채널로 설정합니다.",
+                "type", 1 // CHAT_INPUT
+        );
+
+        client.post()
+                .uri("/applications/{applicationId}/guilds/{guildId}/commands", applicationId, guildId)
+                .header("Authorization", "Bot " + botToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(command)
+                .retrieve()
+                .toBodilessEntity()
+                .block();
+    }
 }
