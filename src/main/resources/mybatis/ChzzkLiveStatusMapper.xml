@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.github.mathbook3948.zzibot.mapper.ChzzkLiveStatusMapper">
+
+    <insert id="insertLiveStatus" parameterType="LiveStatusResponseContent">
+        INSERT INTO chzzk_live_status (
+            live_title,
+            status,
+            concurrent_user_count,
+            accumulate_count,
+            paid_promotion,
+            adult,
+            kr_only_viewing,
+            open_date,
+            close_date,
+            clip_active,
+            chat_channel_id,
+            tags,
+            category_type,
+            live_category,
+            live_category_value,
+            live_polling_status_json,
+            fault_status,
+            user_adult_status,
+            abroad_country,
+            blind_type,
+            chat_active,
+            chat_available_group,
+            chat_available_condition,
+            min_follower_minute,
+            allow_subscriber_in_follower_mode,
+            chat_slow_mode_sec,
+            chat_emoji_mode,
+            chat_donation_ranking_exposure,
+            drops_campaign_no,
+            live_token_list,
+            watch_party_no,
+            watch_party_tag,
+            time_machine_active,
+            channel_id,
+            last_adult_release_date,
+            last_kr_only_viewing_release_date,
+            created_at,
+            updated_at
+        )
+        VALUES (
+                   #{liveTitle},
+                   #{status},
+                   #{concurrentUserCount},
+                   #{accumulateCount},
+                   #{paidPromotion},
+                   #{adult},
+                   #{krOnlyViewing},
+                   #{openDate},
+                   #{closeDate},
+                   #{clipActive},
+                   #{chatChannelId},
+                   #{tags,jdbcType=ARRAY},
+                   #{categoryType},
+                   #{liveCategory},
+                   #{liveCategoryValue},
+                   #{livePollingStatusJson},
+                   #{faultStatus},
+                   #{userAdultStatus},
+                   #{abroadCountry},
+                   #{blindType},
+                   #{chatActive},
+                   #{chatAvailableGroup},
+                   #{chatAvailableCondition},
+                   #{minFollowerMinute},
+                   #{allowSubscriberInFollowerMode},
+                   #{chatSlowModeSec},
+                   #{chatEmojiMode},
+                   #{chatDonationRankingExposure},
+                   #{dropsCampaignNo},
+                   #{liveTokenList,jdbcType=ARRAY},
+                   #{watchPartyNo},
+                   #{watchPartyTag},
+                   #{timeMachineActive},
+                   #{channelId},
+                   #{lastAdultReleaseDate},
+                   #{lastKrOnlyViewingReleaseDate},
+                   now(),
+                   now()
+               )
+    </insert>
+
+    <select id="selectChzzkLiveStatus" parameterType="map" resultType="map">
+        SELECT
+            status
+        FROM chzzk_live_status
+        WHERE channel_id = #{channelId}
+    </select>
+
+    <update id="updateChzzkLiveStatus" parameterType="LiveStatusResponseContent">
+        UPDATE chzzk_live_status
+        SET
+            live_title = #{liveTitle},
+            status = #{status},
+            concurrent_user_count = #{concurrentUserCount},
+            accumulate_count = #{accumulateCount},
+            paid_promotion = #{paidPromotion},
+            adult = #{adult},
+            kr_only_viewing = #{krOnlyViewing},
+            open_date = #{openDate},
+            close_date = #{closeDate},
+            clip_active = #{clipActive},
+            chat_channel_id = #{chatChannelId},
+            tags = #{tags, jdbcType=ARRAY},
+            category_type = #{categoryType},
+            live_category = #{liveCategory},
+            live_category_value = #{liveCategoryValue},
+            live_polling_status_json = #{livePollingStatusJson},
+            fault_status = #{faultStatus},
+            user_adult_status = #{userAdultStatus},
+            abroad_country = #{abroadCountry},
+            blind_type = #{blindType},
+            chat_active = #{chatActive},
+            chat_available_group = #{chatAvailableGroup},
+            chat_available_condition = #{chatAvailableCondition},
+            min_follower_minute = #{minFollowerMinute},
+            allow_subscriber_in_follower_mode = #{allowSubscriberInFollowerMode},
+            chat_slow_mode_sec = #{chatSlowModeSec},
+            chat_emoji_mode = #{chatEmojiMode},
+            chat_donation_ranking_exposure = #{chatDonationRankingExposure},
+            drops_campaign_no = #{dropsCampaignNo},
+            live_token_list = #{liveTokenList, jdbcType=ARRAY},
+            watch_party_no = #{watchPartyNo},
+            watch_party_tag = #{watchPartyTag},
+            time_machine_active = #{timeMachineActive},
+            last_adult_release_date = #{lastAdultReleaseDate},
+            last_kr_only_viewing_release_date = #{lastKrOnlyViewingReleaseDate},
+            updated_at = now()
+        WHERE channel_id = #{channelId}
+    </update>
+
+</mapper>
