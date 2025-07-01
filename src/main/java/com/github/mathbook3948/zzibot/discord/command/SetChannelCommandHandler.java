@@ -26,7 +26,7 @@ public class SetChannelCommandHandler {
     @PostConstruct
     public void register() {
         client.on(ChatInputInteractionEvent.class)
-                .filter(event -> event.getCommandName().equals("set-channel"))
+                .filter(event -> event.getCommandName().equals("알림채널설정"))
                 .flatMap(this::handle)
                 .subscribe();
     }

@@ -1,5 +1,6 @@
 package com.github.mathbook3948.zzibot.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mathbook3948.zzibot.handler.StringArrayTypeHandler;
 import org.apache.ibatis.type.JdbcType;
 import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
@@ -15,6 +16,11 @@ public class WebConfig {
     public ConfigurationCustomizer mybatisConfigurationCustomizer() {
         return configuration -> configuration.getTypeHandlerRegistry()
                 .register(List.class, JdbcType.ARRAY, new StringArrayTypeHandler());
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 
 }

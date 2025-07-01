@@ -1,7 +1,10 @@
 package com.github.mathbook3948.zzibot.job;
 
+import com.github.mathbook3948.zzibot.chzzk.ChzzkChannelClient;
 import com.github.mathbook3948.zzibot.chzzk.ChzzkLiveStatusClient;
-import com.github.mathbook3948.zzibot.dto.chzzk.LiveStatusResponse;
+import com.github.mathbook3948.zzibot.dto.chzzk.ChannelResponseContent;
+import com.github.mathbook3948.zzibot.dto.chzzk.ChzzkResponse;
+import com.github.mathbook3948.zzibot.dto.chzzk.LiveStatusResponseContent;
 import com.github.mathbook3948.zzibot.mapper.ChzzkLiveStatusMapper;
 import com.github.mathbook3948.zzibot.mapper.LiveSubscriptionMapper;
 import com.github.mathbook3948.zzibot.util.DiscordUtil;
@@ -28,15 +31,20 @@ public class CheckChzzkLiveStatusJob implements Job {
     @Autowired
     private DiscordUtil discordUtil;
 
+    @Autowired
+    private ChzzkChannelClient chzzkChannelClient;
+
     @Override
     public void execute(JobExecutionContext context) throws JobExecutionException {
         try {
             JobDataMap dataMap = context.getJobDetail().getJobDataMap();
             String channelId = dataMap.getString("channelId");
 
-            LiveStatusResponse res = chzzkLiveStatusClient.getLiveStatus(channelId);
+            ChzzkResponse<LiveStatusResponseContent> res = chzzkLiveStatusClient.getLiveStatus(channelId);
 
             Map<String, Object> map = chzzkLiveStatusMapper.selectChzzkLiveStatus(Map.of("channelId", channelId));
+
+            ChzzkResponse<ChannelResponseContent> channelRes = chzzkChannelClient.getLiveStatus(channelId);
 
             if (map == null) {
                 chzzkLiveStatusMapper.insertLiveStatus(res.getContent());
@@ -49,6 +57,8 @@ public class CheckChzzkLiveStatusJob implements Job {
                     broadcast(channelId);
                 }
             }
+
+            chzzkLiveStatusMapper.updateChannelName(channelRes.getContent());
         } catch (Exception e) {
             throw new JobExecutionException(e);
         }

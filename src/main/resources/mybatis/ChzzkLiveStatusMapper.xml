@@ -88,6 +88,12 @@
                )
     </insert>
 
+    <update id="updateChannelName" parameterType="ChannelResponseContent">
+        UPDATE chzzk_live_status
+        SET channel_name = #{channelName}
+        WHERE channel_id = #{channelId}
+    </update>
+
     <select id="selectChzzkLiveStatus" parameterType="map" resultType="map">
         SELECT
             status

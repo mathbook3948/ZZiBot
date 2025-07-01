@@ -1,6 +1,10 @@
 package com.github.mathbook3948.zzibot.discord.registry;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.mathbook3948.zzibot.dto.zzibot.CommandDTO;
 import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -10,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-public class CommandRegistrar {
+public abstract class AbstractCommandRegistrar {
 
     @Value("${discord.token}")
     private String botToken;
@@ -21,28 +25,16 @@ public class CommandRegistrar {
     @Value("${discord.test.guild.id}")
     private String guildId;
 
-    private final WebClient client = WebClient.create("https://discord.com/api/v10");
+    @Autowired
+    @Qualifier("discordWebClient")
+    private WebClient client;
 
-    @PostConstruct
-    public void registerPingCommand() {
-        registerLiveSubscription();
-        registerSetChannel();
-    }
+    @Autowired
+    private ObjectMapper objectMapper;
 
-    private void registerLiveSubscription() {
-        Map<String, Object> command = Map.of(
-                "name", "live-subscribe",
-                "description", "치지직 라이브 알림을 받을 채널을 등록합니다.",
-                "type", 1, // CHAT_INPUT
-                "options", List.of(
-                        Map.of(
-                                "type", 3, // STRING
-                                "name", "url",
-                                "description", "치지직 채널 URL",
-                                "required", true
-                        )
-                )
-        );
+    @SuppressWarnings("unchecked")
+    protected void setGuildCommand(CommandDTO config) {
+        Map<String, Object> command = objectMapper.convertValue(config, Map.class);
 
         client.post()
                 .uri("/applications/{applicationId}/guilds/{guildId}/commands", applicationId, guildId)
@@ -54,9 +46,23 @@ public class CommandRegistrar {
                 .block();
     }
 
+    @SuppressWarnings("unchecked")
+    protected void setGlobalCommand(CommandDTO config) {
+        Map<String, Object> command = objectMapper.convertValue(config, Map.class);
+
+        client.post()
+                .uri("/applications/{applicationId}/commands", applicationId)
+                .header("Authorization", "Bot " + botToken)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(command)
+                .retrieve()
+                .toBodilessEntity()
+                .block();
+    }
+
     private void registerSetChannel() {
         Map<String, Object> command = Map.of(
-                "name", "set-channel",
+                "name", "채널설정",
                 "description", "이 채널을 봇 기본 채널로 설정합니다.",
                 "type", 1 // CHAT_INPUT
         );

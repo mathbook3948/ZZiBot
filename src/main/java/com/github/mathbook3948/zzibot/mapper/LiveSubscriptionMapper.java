@@ -16,4 +16,9 @@ public interface LiveSubscriptionMapper {
     List<String> selectLiveSubscriptionDistinct() throws Exception;
 
     List<Map<String, Object>> selectLiveSubscriptionByChannelId(Map<String, Object> params) throws Exception;
+
+    List<Map<String, Object>> selectLiveSubscriptionWithGuildIDAndSearch(Map<String, Object> params) throws Exception;
+
+    void deleteLiveSubscriptionWithChannelId(Map<String, Object> params) throws Exception;
+
 }

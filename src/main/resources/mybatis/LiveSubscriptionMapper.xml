@@ -34,4 +34,22 @@
         WHERE ls.channel_id = #{channelId}
         ORDER BY ls.guild_id, lac.channel_id
     </select>
+
+    <select id="selectLiveSubscriptionWithGuildIDAndSearch" parameterType="map" resultType="map">
+        SELECT
+            ls.guild_id,
+            ls.channel_id,
+            ls.created_at,
+            cls.channel_name
+        FROM live_subscription ls JOIN chzzk_live_status cls ON ls.channel_id = cls.channel_id
+        WHERE guild_id = #{guildId}
+        <if test="search != null and search != ''">
+            AND cls.channel_name ILIKE '%' || #{search} || '%'
+        </if>
+    </select>
+
+    <delete id="deleteLiveSubscriptionWithChannelId" parameterType="map">
+        DELETE FROM live_subscription
+        WHERE guild_id = #{guildId} AND channel_id = #{channelId}
+    </delete>
 </mapper>

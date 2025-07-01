@@ -4,13 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.ibatis.type.Alias;
 
-import java.util.List;
-
 @Getter
 @Setter
-@Alias("LiveStatusResponse")
-public class LiveStatusResponse {
+@Alias("ChzzkResponse")
+public class ChzzkResponse<T extends ChzzkContentBase> {
     private int code;
     private String message;
-    private LiveStatusResponseContent content;
+    private T content;
 }

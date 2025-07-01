@@ -1,5 +1,6 @@
 package com.github.mathbook3948.zzibot.mapper;
 
+import com.github.mathbook3948.zzibot.dto.chzzk.ChannelResponseContent;
 import com.github.mathbook3948.zzibot.dto.chzzk.LiveStatusResponseContent;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -13,4 +14,6 @@ public interface ChzzkLiveStatusMapper {
     Map<String, Object> selectChzzkLiveStatus(Map<String, Object> params) throws Exception;
 
     void updateChzzkLiveStatus(LiveStatusResponseContent params) throws Exception;
+
+    void updateChannelName(ChannelResponseContent params);
 }

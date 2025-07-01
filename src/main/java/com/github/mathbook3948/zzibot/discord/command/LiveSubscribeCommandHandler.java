@@ -44,9 +44,9 @@ public class LiveSubscribeCommandHandler {
     private LiveSubscribeCommandHandler self;
 
     @PostConstruct
-    public void register() {
+    public void init() {
         client.on(ChatInputInteractionEvent.class)
-                .filter(event -> event.getCommandName().equals("live-subscribe"))
+                .filter(event -> event.getCommandName().equals("알림등록"))
                 .flatMap(this::handle)
                 .subscribe();
     }

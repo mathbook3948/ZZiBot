@@ -11,7 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @Alias("LiveStatusResponseContent")
-public class LiveStatusResponseContent {
+public class LiveStatusResponseContent implements ChzzkContentBase{
         private String liveTitle;
         private String status;
         private int concurrentUserCount;
