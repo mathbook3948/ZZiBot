@@ -70,7 +70,7 @@ public class CheckChzzkLiveStatusJob implements Job {
         for (Map<String, Object> map : list) {
             String discordChannelId = map.get("channel_id").toString();
 
-            discordUtil.sendMessageAsync(discordChannelId, "https://chzzk.naver.com/" + channel_id);
+            discordUtil.sendMessageAsync(discordChannelId, channel_id);
         }
     }
 }
