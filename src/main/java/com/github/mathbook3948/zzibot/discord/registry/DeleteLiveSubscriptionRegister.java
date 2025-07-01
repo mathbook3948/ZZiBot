@@ -20,7 +20,7 @@ public class DeleteLiveSubscriptionRegister extends AbstractCommandRegistrar{
     );
 
     @PostConstruct
-    public void registerPingCommand() {
+    public void init() {
         CommandDTO command = new CommandDTO(NAME, DESCRIPTION, TYPE, OPTIONS);
 
         if(System.getenv("SPRING_PROFILES_ACTIVE").equalsIgnoreCase("loc")) {
