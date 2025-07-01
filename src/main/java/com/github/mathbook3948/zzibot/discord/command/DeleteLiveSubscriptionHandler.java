@@ -11,6 +11,7 @@ import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.core.object.entity.channel.MessageChannel;
 import discord4j.discordjson.json.ApplicationCommandOptionChoiceData;
+import discord4j.rest.util.Permission;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -21,6 +22,7 @@ import reactor.core.publisher.Mono;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 @Component
 public class DeleteLiveSubscriptionHandler {
@@ -47,24 +49,33 @@ public class DeleteLiveSubscriptionHandler {
     }
 
     private Mono<Void> handle(ChatInputInteractionEvent event) {
-        return event.getInteraction().getChannel()
-                .ofType(MessageChannel.class)
-                .flatMap(channel -> {
-                    String message = "";
-                    try {
-                        self.handletransactional(event);
+        return Mono.justOrEmpty(event.getInteraction().getMember())
+                .flatMap(member -> member.getBasePermissions()
+                        .flatMap(perms -> {
+                            if (!perms.contains(Permission.ADMINISTRATOR)) {
+                                return event.reply("관리자만 사용할 수 있습니다.").withEphemeral(true);
+                            }
 
-                        message = "알림 해제를 성공하였습니다.";
-                    } catch (Exception e) {
-                        logger.error("error in /알림해제 handler: {}", e.getMessage());
-                        message = "알 수 없는 오류가 발생하였습니다.";
-                    }
+                            return event.getInteraction().getChannel()
+                                    .ofType(MessageChannel.class)
+                                    .flatMap(channel -> {
+                                        String message;
+                                        try {
+                                            self.handletransactional(event);
+                                            message = "알림 해제를 성공하였습니다.";
+                                        } catch (Exception e) {
+                                            logger.error("error in /알림해제 handler: {}", e.getMessage());
+                                            message = "알 수 없는 오류가 발생하였습니다.";
+                                        }
 
-                    return event.reply()
-                            .withEphemeral(true)
-                            .withContent(message);
-                }).then();
+                                        return event.reply()
+                                                .withEphemeral(true)
+                                                .withContent(message);
+                                    });
+                        })
+                );
     }
+
 
     private Mono<Void> handleAutoComplete(ChatInputAutoCompleteEvent event) {
         List<ApplicationCommandOptionChoiceData> choices = new ArrayList<>();

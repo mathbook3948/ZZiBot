@@ -11,6 +11,7 @@ import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.command.ApplicationCommandInteractionOption;
 import discord4j.core.object.command.ApplicationCommandInteractionOptionValue;
 import discord4j.core.object.entity.channel.MessageChannel;
+import discord4j.rest.util.Permission;
 import jakarta.annotation.PostConstruct;
 import org.quartz.*;
 import org.slf4j.Logger;
@@ -52,26 +53,35 @@ public class LiveSubscribeCommandHandler {
     }
 
     private Mono<Void> handle(ChatInputInteractionEvent event) {
-        return event.getInteraction().getChannel()
-                .ofType(MessageChannel.class)
-                .flatMap(channel -> {
-                    String message = "";
-                    try {
-                        self.handletransactional(event);
+        return Mono.justOrEmpty(event.getInteraction().getMember())
+                .flatMap(member -> member.getBasePermissions()
+                        .flatMap(perms -> {
+                            if (!perms.contains(Permission.ADMINISTRATOR)) {
+                                return event.reply("관리자만 사용할 수 있습니다.").withEphemeral(true);
+                            }
 
-                        message = "구독에 성공하였습니다.";
-                    } catch (LiveSubscriptionLimitExceededException lslee) {
-                        message = lslee.getMessage();
-                    } catch (Exception e) {
-                        logger.error("error in /live-subscribe handler: {}", e.getMessage());
-                        message = "알 수 없는 오류가 발생하였습니다.";
-                    }
+                            return event.getInteraction().getChannel()
+                                    .ofType(MessageChannel.class)
+                                    .flatMap(channel -> {
+                                        String message;
+                                        try {
+                                            self.handletransactional(event);
+                                            message = "구독에 성공하였습니다.";
+                                        } catch (LiveSubscriptionLimitExceededException lslee) {
+                                            message = lslee.getMessage();
+                                        } catch (Exception e) {
+                                            logger.error("error in /live-subscribe handler: {}", e.getMessage());
+                                            message = "알 수 없는 오류가 발생하였습니다.";
+                                        }
 
-                    return event.reply()
-                            .withEphemeral(true)
-                            .withContent(message);
-                }).then();
+                                        return event.reply()
+                                                .withEphemeral(true)
+                                                .withContent(message);
+                                    });
+                        })
+                );
     }
+
 
     @Transactional
     public void handletransactional(ChatInputInteractionEvent event) throws Exception {
