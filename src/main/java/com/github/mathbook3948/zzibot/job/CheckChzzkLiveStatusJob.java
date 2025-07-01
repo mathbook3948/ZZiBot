@@ -69,8 +69,9 @@ public class CheckChzzkLiveStatusJob implements Job {
 
         for (Map<String, Object> map : list) {
             String discordChannelId = map.get("channel_id").toString();
+            String liveTitle = map.get("live_title").toString();
 
-            discordUtil.sendMessageAsync(discordChannelId, channel_id);
+            discordUtil.sendMessageAsync(discordChannelId, channel_id, liveTitle);
         }
     }
 }

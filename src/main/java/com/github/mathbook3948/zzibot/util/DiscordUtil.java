@@ -25,7 +25,7 @@ public class DiscordUtil {
     private final String URL = "https://chzzk.naver.com/";
 
     @Async
-    public void sendMessageAsync(String discordChannelId, String chzzkChannelId) {
+    public void sendMessageAsync(String discordChannelId, String chzzkChannelId, String liveTitle) {
         ChzzkResponse<ChannelResponseContent> res = chzzkChannelClient.getLiveStatus(chzzkChannelId);
 
         String embedUrl = URL + chzzkChannelId;
@@ -37,9 +37,9 @@ public class DiscordUtil {
                 .flatMap(channel -> channel.createMessage(
                         MessageCreateSpec.builder()
                                 .addEmbed(EmbedCreateSpec.builder()
-                                        .title("🎥 치지직 라이브 알림")
+                                        .title("**" + channelName + "**님이 방송을 시작했습니다!")
                                         .url(embedUrl)
-                                        .description("**" + channelName + "**님이 방송을 시작했습니다!")
+                                        .description(liveTitle)
                                         .thumbnail(channelImageUrl)
                                         .color(Color.MOON_YELLOW)
                                         .build())
