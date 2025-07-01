@@ -124,7 +124,7 @@ public class LiveSubscribeCommandHandler {
                         .forJob(jobDetail)
                         .withIdentity("trigger_" + channelId, "liveGroup")
                         .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-                                .withIntervalInSeconds(120)
+                                .withIntervalInSeconds(180)
                                 .repeatForever())
                         .build();
 
