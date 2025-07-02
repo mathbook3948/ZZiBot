@@ -3,6 +3,7 @@ package com.github.mathbook3948.zzibot.discord.registry;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mathbook3948.zzibot.dto.zzibot.CommandDTO;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +17,8 @@ import java.util.Map;
 
 @Component
 public abstract class AbstractCommandRegistrar {
+
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(AbstractCommandRegistrar.class);
 
     @Value("${discord.token:}")
     private String botToken;
@@ -57,7 +60,15 @@ public abstract class AbstractCommandRegistrar {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(command)
                 .retrieve()
+                .onStatus(status -> !status.is2xxSuccessful(),
+                        res -> res.bodyToMono(String.class).flatMap(body -> {
+                            logger.error("Failed to register command: " + body);
+                            return Mono.error(new RuntimeException("Discord API error: " + body));
+                        })
+                )
                 .toBodilessEntity()
+                .doOnSuccess(resp -> logger.info("Command registered: " + config.getName()))
+                .doOnError(err -> System.err.println("Registration error: " + err.getMessage()))
                 .then();
     }
 }
