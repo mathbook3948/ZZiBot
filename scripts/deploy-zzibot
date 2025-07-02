@@ -1,6 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
+cd ${ZZIBOT_HOME}
+
 git pull
 
 docker build -t zzibot-app .
