@@ -2,12 +2,15 @@ package com.github.mathbook3948.zzibot.discord.registry;
 
 import com.github.mathbook3948.zzibot.dto.zzibot.CommandDTO;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
 public class DeleteLiveSubscriptionRegister extends AbstractCommandRegistrar{
+
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(DeleteLiveSubscriptionRegister.class);
 
     private final String NAME = "알림해제";
 
@@ -24,9 +27,11 @@ public class DeleteLiveSubscriptionRegister extends AbstractCommandRegistrar{
         CommandDTO command = new CommandDTO(NAME, DESCRIPTION, TYPE, OPTIONS);
 
         if(System.getenv("SPRING_PROFILES_ACTIVE").equalsIgnoreCase("loc")) {
-            setGuildCommand(command);
+            super.setGuildCommand(command);
+            logger.info("DeleteLiveSubscriptionRegister is registered to guild.");
         } else {
             super.setGlobalCommand(command);
+            logger.info("DeleteLiveSubscriptionRegister is registered to global.");
         }
     }
 }

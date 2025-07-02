@@ -2,6 +2,7 @@ package com.github.mathbook3948.zzibot.discord.registry;
 
 import com.github.mathbook3948.zzibot.dto.zzibot.CommandDTO;
 import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +11,8 @@ import java.util.Map;
 
 @Component
 public class LiveSubscriptionRegister extends AbstractCommandRegistrar{
+
+    private static final Logger logger = org.slf4j.LoggerFactory.getLogger(LiveSubscriptionRegister.class);
 
     private final String NAME = "알림등록";
 
@@ -26,9 +29,11 @@ public class LiveSubscriptionRegister extends AbstractCommandRegistrar{
         CommandDTO command = new CommandDTO(NAME, DESCRIPTION, TYPE, OPTIONS);
 
         if(System.getenv("SPRING_PROFILES_ACTIVE").equalsIgnoreCase("loc")) {
-            setGuildCommand(command);
+            super.setGuildCommand(command);
+            logger.info("LiveSubscriptionRegister is registered to guild.");
         } else {
             super.setGlobalCommand(command);
+            logger.info("LiveSubscriptionRegister is registered to global.");
         }
     }
 }
