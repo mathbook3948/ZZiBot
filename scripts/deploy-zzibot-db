@@ -1,6 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
+if [[ -z "${ZZIBOT_DB_PASSWORD:-}" ]]; then
+  echo "오류: ZZIBOT_DB_PASSWORD 환경변수가 설정되지 않았습니다." >&2
+  exit 1
+fi
+
 mkdir -p "$HOME/db_data"
 sudo chown -R 999:999 "$HOME/db_data"
 
@@ -8,7 +13,7 @@ docker run -d \
   --name zzibot-db \
   -e POSTGRES_DB=zzibot \
   -e POSTGRES_USER=zzibot \
-  -e POSTGRES_PASSWORD=zzibot3948!?z \
+  -e POSTGRES_PASSWORD="$ZZIBOT_DB_PASSWORD" \
   -v "$HOME/db_data:/var/lib/postgresql/data" \
   -p 5432:5432 \
   postgres:16
