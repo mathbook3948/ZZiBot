@@ -17,13 +17,13 @@ import java.util.Map;
 @Component
 public abstract class AbstractCommandRegistrar {
 
-    @Value("${discord.token}")
+    @Value("${discord.token:}")
     private String botToken;
 
-    @Value("${discord.application.id}")
+    @Value("${discord.application.id:}")
     private String applicationId;
 
-    @Value("${discord.test.guild.id}")
+    @Value("${discord.test.guild.id:}")
     private String guildId;
 
     @Autowired
@@ -59,22 +59,5 @@ public abstract class AbstractCommandRegistrar {
                 .retrieve()
                 .toBodilessEntity()
                 .then();
-    }
-
-    private void registerSetChannel() {
-        Map<String, Object> command = Map.of(
-                "name", "채널설정",
-                "description", "이 채널을 봇 기본 채널로 설정합니다.",
-                "type", 1 // CHAT_INPUT
-        );
-
-        client.post()
-                .uri("/applications/{applicationId}/guilds/{guildId}/commands", applicationId, guildId)
-                .header("Authorization", "Bot " + botToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(command)
-                .retrieve()
-                .toBodilessEntity()
-                .block();
     }
 }
