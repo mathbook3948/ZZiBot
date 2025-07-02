@@ -54,6 +54,13 @@ public abstract class AbstractCommandRegistrar {
     protected Mono<Void> setGlobalCommand(CommandDTO config) {
         Map<String, Object> command = objectMapper.convertValue(config, Map.class);
 
+        try {
+            String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(command);
+            logger.info("Registering Global Command:\n" + prettyJson);
+        } catch (Exception e) {
+            logger.error("Failed to serialize command JSON", e);
+        }
+
         return client.post()
                 .uri("/applications/{applicationId}/commands", applicationId)
                 .header("Authorization", "Bot " + botToken)
@@ -68,7 +75,8 @@ public abstract class AbstractCommandRegistrar {
                 )
                 .toBodilessEntity()
                 .doOnSuccess(resp -> logger.info("Command registered: " + config.getName()))
-                .doOnError(err -> System.err.println("Registration error: " + err.getMessage()))
+                .doOnError(err -> logger.error("Registration error", err))
                 .then();
     }
+
 }
