@@ -1,0 +1,12 @@
+#!/bin/bash
+set -euo pipefail
+
+git pull
+
+docker build -t zzibot-app .
+
+if docker ps -a --format '{{.Names}}' | grep -q '^zzibot$'; then
+  docker rm zzibot --force
+fi
+
+docker run -d --name zzibot -p 8080:8080 zzibot-app

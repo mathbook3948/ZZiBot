@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+
+mkdir -p "$HOME/db_data"
+sudo chown -R 999:999 "$HOME/db_data"
+
+docker run -d \
+  --name zzibot-db \
+  -e POSTGRES_DB=zzibot \
+  -e POSTGRES_USER=zzibot \
+  -e POSTGRES_PASSWORD=zzibot3948!?z \
+  -v "$HOME/db_data:/var/lib/postgresql/data" \
+  -p 5432:5432 \
+  postgres:16

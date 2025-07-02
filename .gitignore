@@ -38,3 +38,5 @@ out/
 
 src/main/resources/application-loc.properties
 src/main/resources/application-dev.properties
+
+server
