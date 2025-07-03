@@ -1,6 +1,8 @@
 package com.github.mathbook3948.zzibot.discord.command;
 
 import com.github.mathbook3948.zzibot.dto.zzibot.LiveSubscription;
+import com.github.mathbook3948.zzibot.exception.DuplicateLiveSubscriptionException;
+import com.github.mathbook3948.zzibot.exception.LiveSubscriptionException;
 import com.github.mathbook3948.zzibot.exception.LiveSubscriptionLimitExceededException;
 import com.github.mathbook3948.zzibot.job.CheckChzzkLiveStatusJob;
 import com.github.mathbook3948.zzibot.mapper.LiveSubscriptionMapper;
@@ -67,10 +69,10 @@ public class LiveSubscribeCommandHandler {
                                         try {
                                             self.handletransactional(event);
                                             message = "구독에 성공하였습니다.";
-                                        } catch (LiveSubscriptionLimitExceededException lslee) {
+                                        } catch (LiveSubscriptionException lslee) {
                                             message = lslee.getMessage();
                                         } catch (Exception e) {
-                                            logger.error("error in /live-subscribe handler: {}", e.getMessage());
+                                            logger.error("error in LiveSubscribeCommandHandler: {}", e.getMessage());
                                             message = "알 수 없는 오류가 발생하였습니다.";
                                         }
 
@@ -84,7 +86,7 @@ public class LiveSubscribeCommandHandler {
 
 
     @Transactional
-    public void handletransactional(ChatInputInteractionEvent event) throws Exception {
+    public String handletransactional(ChatInputInteractionEvent event) throws Exception {
         String url = event.getOption("url")
                 .flatMap(ApplicationCommandInteractionOption::getValue)
                 .map(ApplicationCommandInteractionOptionValue::asString)
@@ -102,8 +104,16 @@ public class LiveSubscribeCommandHandler {
             throw new LiveSubscriptionLimitExceededException(null);
         }
 
+        for(LiveSubscription liveSubscription : list) {
+            if(liveSubscription.getChannelId().equals(channelId)) {
+                throw new DuplicateLiveSubscriptionException(null);
+            }
+        }
+
         liveSubscriptionMapper.insertLiveSubscription(ls);
         registerJob(channelId);
+
+        return "구독에 성공하였습니다.";
     }
 
     private void registerJob(String channelId) {
