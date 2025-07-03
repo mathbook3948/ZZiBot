@@ -1,8 +1,12 @@
 package com.github.mathbook3948.zzibot.discord.command;
 
 import com.github.mathbook3948.zzibot.dto.zzibot.LiveSubscription;
+import com.github.mathbook3948.zzibot.dto.zzibot.log.DiscordLogDTO;
+import com.github.mathbook3948.zzibot.enums.DiscordLogEventContent;
 import com.github.mathbook3948.zzibot.exception.LiveSubscriptionLimitExceededException;
+import com.github.mathbook3948.zzibot.mapper.DiscordLogMapper;
 import com.github.mathbook3948.zzibot.mapper.LiveSubscriptionMapper;
+import com.github.mathbook3948.zzibot.util.DiscordUtil;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputAutoCompleteEvent;
@@ -38,6 +42,9 @@ public class DeleteLiveSubscriptionHandler {
     @Lazy
     private DeleteLiveSubscriptionHandler self;
 
+    @Autowired
+    private DiscordUtil discordUtil;
+
     public DeleteLiveSubscriptionHandler(GatewayDiscordClient client) {
         client.on(ChatInputAutoCompleteEvent.class, this::handleAutoComplete)
                 .subscribe();
@@ -49,10 +56,13 @@ public class DeleteLiveSubscriptionHandler {
     }
 
     private Mono<Void> handle(ChatInputInteractionEvent event) {
+        DiscordLogDTO log = new DiscordLogDTO();
+
         return Mono.justOrEmpty(event.getInteraction().getMember())
                 .flatMap(member -> member.getBasePermissions()
                         .flatMap(perms -> {
                             if (!perms.contains(Permission.ADMINISTRATOR)) {
+                                discordUtil.insertDiscordLog(event, false, COMMAND, DiscordLogEventContent.REQUIRE_ADMINISTRATOR);
                                 return event.reply("관리자만 사용할 수 있습니다.").withEphemeral(true);
                             }
 
@@ -64,10 +74,13 @@ public class DeleteLiveSubscriptionHandler {
                                             self.handletransactional(event);
                                             message = "알림 해제를 성공하였습니다.";
                                         } catch (Exception e) {
+                                            discordUtil.insertDiscordLog(event, false, COMMAND, e.getMessage());
+
                                             logger.error("error in /알림해제 handler: {}", e.getMessage());
                                             message = "알 수 없는 오류가 발생하였습니다.";
                                         }
 
+                                        discordUtil.insertDiscordLog(event, true, COMMAND, "");
                                         return event.reply()
                                                 .withEphemeral(true)
                                                 .withContent(message);

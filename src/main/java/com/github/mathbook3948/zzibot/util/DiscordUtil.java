@@ -3,8 +3,12 @@ package com.github.mathbook3948.zzibot.util;
 import com.github.mathbook3948.zzibot.chzzk.ChzzkChannelClient;
 import com.github.mathbook3948.zzibot.dto.chzzk.ChannelResponseContent;
 import com.github.mathbook3948.zzibot.dto.chzzk.ChzzkResponse;
+import com.github.mathbook3948.zzibot.dto.zzibot.log.DiscordLogDTO;
+import com.github.mathbook3948.zzibot.enums.DiscordLogEventContent;
+import com.github.mathbook3948.zzibot.mapper.DiscordLogMapper;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
+import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
 import discord4j.core.object.entity.channel.TextChannel;
 import discord4j.core.spec.EmbedCreateSpec;
 import discord4j.core.spec.MessageCreateSpec;
@@ -21,6 +25,9 @@ public class DiscordUtil {
 
     @Autowired
     private ChzzkChannelClient chzzkChannelClient;
+
+    @Autowired
+    private DiscordLogMapper discordLogMapper;
 
     private final String URL = "https://chzzk.naver.com/";
 
@@ -46,4 +53,59 @@ public class DiscordUtil {
                                 .build()))
                 .subscribe();
     }
+
+    @Async
+    public void insertDiscordLog(ChatInputInteractionEvent event, boolean isSuccess, String command, String content) {
+        DiscordLogDTO log = new DiscordLogDTO();
+
+        log.setDiscord_log_is_success(isSuccess);
+        log.setDiscord_log_content(content);
+        log.setDiscord_log_command(command);
+
+        String guildId = event.getInteraction().getGuildId()
+                .map(Snowflake::asString)
+                .orElse(null);
+
+        String channelId = event.getInteraction().getChannel()
+                .map(channel -> channel.getId().asString())
+                .block();
+
+        event.getInteraction().getMember().ifPresent(member -> {
+            log.setDiscord_log_user_id(member.getId().asString());
+            log.setDiscord_log_user_tag(member.getTag());
+        });
+
+        log.setDiscord_log_guild_id(guildId);
+        log.setDiscord_log_channel_id(channelId);
+
+        discordLogMapper.insertDiscordLog(log);
+    }
+
+    @Async
+    public void insertDiscordLog(ChatInputInteractionEvent event, boolean isSuccess, String command, DiscordLogEventContent content) {
+        DiscordLogDTO log = new DiscordLogDTO();
+
+        log.setDiscord_log_is_success(isSuccess);
+        log.setDiscord_log_content(content.getValue());
+        log.setDiscord_log_command(command);
+
+        String guildId = event.getInteraction().getGuildId()
+                .map(Snowflake::asString)
+                .orElse(null);
+
+        String channelId = event.getInteraction().getChannel()
+                .map(channel -> channel.getId().asString())
+                .block();
+
+        event.getInteraction().getMember().ifPresent(member -> {
+            log.setDiscord_log_user_id(member.getId().asString());
+            log.setDiscord_log_user_tag(member.getTag());
+        });
+
+        log.setDiscord_log_guild_id(guildId);
+        log.setDiscord_log_channel_id(channelId);
+
+        discordLogMapper.insertDiscordLog(log);
+    }
+
 }

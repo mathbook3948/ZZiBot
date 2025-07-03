@@ -1,12 +1,14 @@
 package com.github.mathbook3948.zzibot.discord.command;
 
 import com.github.mathbook3948.zzibot.dto.zzibot.LiveSubscription;
+import com.github.mathbook3948.zzibot.enums.DiscordLogEventContent;
 import com.github.mathbook3948.zzibot.exception.DuplicateLiveSubscriptionException;
 import com.github.mathbook3948.zzibot.exception.LiveSubscriptionException;
 import com.github.mathbook3948.zzibot.exception.LiveSubscriptionLimitExceededException;
 import com.github.mathbook3948.zzibot.job.CheckChzzkLiveStatusJob;
 import com.github.mathbook3948.zzibot.mapper.LiveSubscriptionMapper;
 import com.github.mathbook3948.zzibot.util.ChzzkUtil;
+import com.github.mathbook3948.zzibot.util.DiscordUtil;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
@@ -33,6 +35,8 @@ public class LiveSubscribeCommandHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(LiveSubscribeCommandHandler.class);
 
+    private final String COMMAND = "알림등록";
+
     @Autowired
     private GatewayDiscordClient client;
 
@@ -46,10 +50,13 @@ public class LiveSubscribeCommandHandler {
     @Lazy
     private LiveSubscribeCommandHandler self;
 
+    @Autowired
+    private DiscordUtil discordUtil;
+
     @PostConstruct
     public void init() {
         client.on(ChatInputInteractionEvent.class)
-                .filter(event -> event.getCommandName().equals("알림등록"))
+                .filter(event -> event.getCommandName().equals(COMMAND))
                 .flatMap(this::handle)
                 .subscribe();
     }
@@ -59,6 +66,7 @@ public class LiveSubscribeCommandHandler {
                 .flatMap(member -> member.getBasePermissions()
                         .flatMap(perms -> {
                             if (!perms.contains(Permission.ADMINISTRATOR)) {
+                                discordUtil.insertDiscordLog(event, false, COMMAND, DiscordLogEventContent.REQUIRE_ADMINISTRATOR);
                                 return event.reply("관리자만 사용할 수 있습니다.").withEphemeral(true);
                             }
 
@@ -68,10 +76,13 @@ public class LiveSubscribeCommandHandler {
                                         String message;
                                         try {
                                             self.handletransactional(event);
+                                            discordUtil.insertDiscordLog(event, true, COMMAND, "");
                                             message = "구독에 성공하였습니다.";
                                         } catch (LiveSubscriptionException lslee) {
+                                            discordUtil.insertDiscordLog(event, false, COMMAND, lslee.getMessage());
                                             message = lslee.getMessage();
                                         } catch (Exception e) {
+                                            discordUtil.insertDiscordLog(event, false, COMMAND, e.getMessage());
                                             logger.error("error in LiveSubscribeCommandHandler: {}", e.getMessage());
                                             message = "알 수 없는 오류가 발생하였습니다.";
                                         }

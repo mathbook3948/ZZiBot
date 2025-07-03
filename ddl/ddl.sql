@@ -83,3 +83,17 @@ CREATE TABLE admin (
                        admin_is_superadmin boolean DEFAULT false,
                        PRIMARY KEY (admin_id)
 );
+
+create table discord_log
+(
+    discord_log_idx        serial
+        primary key,
+    discord_log_command    varchar(255) not null,
+    discord_log_is_success boolean      not null,
+    discord_log_time       timestamp default CURRENT_TIMESTAMP,
+    discord_log_content    text,
+    discord_log_channel_id varchar(64),
+    discord_log_guild_id   varchar(64),
+    discord_log_user_id    varchar(255),
+    discord_log_user_tag   varchar(255)
+);

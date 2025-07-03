@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.github.mathbook3948.zzibot.mapper.DiscordLogMapper">
+    <insert id="insertDiscordLog" parameterType="DiscordLogDTO">
+        INSERT INTO discord_log (discord_log_command, discord_log_is_success, discord_log_content, discord_log_channel_id, discord_log_guild_id, discord_log_user_id, discord_log_user_tag)
+        VALUES (#{discord_log_command}, #{discord_log_is_success}, #{discord_log_content}, #{discord_log_channel_id}, #{discord_log_guild_id}, #{discord_log_user_id}, #{discord_log_user_tag})
+    </insert>
+</mapper>

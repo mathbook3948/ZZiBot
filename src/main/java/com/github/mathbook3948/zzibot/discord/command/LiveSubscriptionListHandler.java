@@ -1,8 +1,10 @@
 package com.github.mathbook3948.zzibot.discord.command;
 
 import com.github.mathbook3948.zzibot.dto.zzibot.LiveAlarmChannel;
+import com.github.mathbook3948.zzibot.enums.DiscordLogEventContent;
 import com.github.mathbook3948.zzibot.mapper.LiveAlarmChannelMapper;
 import com.github.mathbook3948.zzibot.mapper.LiveSubscriptionMapper;
+import com.github.mathbook3948.zzibot.util.DiscordUtil;
 import discord4j.common.util.Snowflake;
 import discord4j.core.GatewayDiscordClient;
 import discord4j.core.event.domain.interaction.ChatInputInteractionEvent;
@@ -42,6 +44,9 @@ public class LiveSubscriptionListHandler {
     @Autowired
     private LiveSubscriptionMapper liveSubscriptionMapper;
 
+    @Autowired
+    private DiscordUtil discordUtil;
+
     @PostConstruct
     public void register() {
         client.on(ChatInputInteractionEvent.class)
@@ -60,6 +65,8 @@ public class LiveSubscriptionListHandler {
                                 .selectLiveSubscriptionWithGuildIDAndSearch(Map.of("guildId", guildId));
 
                         if (list.isEmpty()) {
+                            discordUtil.insertDiscordLog(event, true, COMMAND, DiscordLogEventContent.ALARM_NOT_FOUND);
+
                             return event.reply()
                                     .withEphemeral(true)
                                     .withContent("등록된 알림 채널이 없습니다.");
@@ -84,6 +91,7 @@ public class LiveSubscriptionListHandler {
                                     .append("\n");
                         }
 
+                        discordUtil.insertDiscordLog(event, true, COMMAND, "");
                         return event.reply()
                                 .withEphemeral(true)
                                 .withEmbeds(EmbedCreateSpec.builder()
@@ -91,6 +99,7 @@ public class LiveSubscriptionListHandler {
                                         .description(desc.toString())
                                         .build());
                     } catch (Exception e) {
+                        discordUtil.insertDiscordLog(event, false, COMMAND, e.getMessage());
                         logger.error("Error in LiveSubscriptionListHandler: {}", e.getMessage(), e);
                         return event.reply()
                                 .withEphemeral(true)
