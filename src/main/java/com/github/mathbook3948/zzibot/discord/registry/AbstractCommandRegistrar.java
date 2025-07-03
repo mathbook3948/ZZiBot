@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
 import java.util.Map;
 
 @Component
@@ -37,46 +36,72 @@ public abstract class AbstractCommandRegistrar {
     private ObjectMapper objectMapper;
 
     @SuppressWarnings("unchecked")
-    protected Mono<Void> setGuildCommand(CommandDTO config) {
+    protected void setGlobalCommand(CommandDTO config) {
         Map<String, Object> command = objectMapper.convertValue(config, Map.class);
 
-        return client.post()
-                .uri("/applications/{applicationId}/guilds/{guildId}/commands", applicationId, guildId)
-                .header("Authorization", "Bot " + botToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(command)
-                .retrieve()
-                .toBodilessEntity()
-                .then();
+        String jsonBody;
+        try {
+            jsonBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(command);
+            logger.info("Registering Global Command - JSON Body:\n{}", jsonBody);
+        } catch (Exception e) {
+            logger.error("Failed to serialize command JSON", e);
+            jsonBody = "{}";
+        }
+
+        try {
+            String response = client.post()
+                    .uri("/applications/{applicationId}/commands", applicationId)
+                    .header("Authorization", "Bot " + botToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(command)
+                    .retrieve()
+                    .onStatus(status -> !status.is2xxSuccessful(),
+                            res -> res.bodyToMono(String.class).flatMap(body -> {
+                                logger.error("Failed to register command: {}", body);
+                                return Mono.error(new RuntimeException("Discord API error: " + body));
+                            })
+                    )
+                    .bodyToMono(String.class)
+                    .block();
+
+            logger.info("Discord API response: {}", response != null ? response : "(empty)");
+        } catch (Exception ex) {
+            logger.error("Global command registration failed", ex);
+        }
     }
 
     @SuppressWarnings("unchecked")
-    protected Mono<Void> setGlobalCommand(CommandDTO config) {
+    protected void setGuildCommand(CommandDTO config) {
         Map<String, Object> command = objectMapper.convertValue(config, Map.class);
 
+        String jsonBody;
         try {
-            String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(command);
-            logger.info("Registering Global Command:\n" + prettyJson);
+            jsonBody = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(command);
+            logger.info("Registering Guild Command - JSON Body:\n{}", jsonBody);
         } catch (Exception e) {
             logger.error("Failed to serialize command JSON", e);
+            jsonBody = "{}";
         }
 
-        return client.post()
-                .uri("/applications/{applicationId}/commands", applicationId)
-                .header("Authorization", "Bot " + botToken)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(command)
-                .retrieve()
-                .onStatus(status -> !status.is2xxSuccessful(),
-                        res -> res.bodyToMono(String.class).flatMap(body -> {
-                            logger.error("Failed to register command: " + body);
-                            return Mono.error(new RuntimeException("Discord API error: " + body));
-                        })
-                )
-                .toBodilessEntity()
-                .doOnSuccess(resp -> logger.info("Command registered: " + config.getName()))
-                .doOnError(err -> logger.error("Registration error", err))
-                .then();
-    }
+        try {
+            String response = client.post()
+                    .uri("/applications/{applicationId}/guilds/{guildId}/commands", applicationId, guildId)
+                    .header("Authorization", "Bot " + botToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .bodyValue(command)
+                    .retrieve()
+                    .onStatus(status -> !status.is2xxSuccessful(),
+                            res -> res.bodyToMono(String.class).flatMap(body -> {
+                                logger.error("Failed to register guild command: {}", body);
+                                return Mono.error(new RuntimeException("Discord API error: " + body));
+                            })
+                    )
+                    .bodyToMono(String.class)
+                    .block();
 
+            logger.info("Discord API guild response: {}", response != null ? response : "(empty)");
+        } catch (Exception ex) {
+            logger.error("Guild command registration failed", ex);
+        }
+    }
 }
