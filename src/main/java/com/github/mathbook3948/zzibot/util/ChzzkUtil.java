@@ -1,5 +1,7 @@
 package com.github.mathbook3948.zzibot.util;
 
+import com.github.mathbook3948.zzibot.exception.NotSupportedUrlException;
+
 import java.net.URI;
 
 public class ChzzkUtil {
@@ -14,24 +16,20 @@ public class ChzzkUtil {
      * @param url 치지직 방송 URL
      * @return 추출된 채널 ID, 실패 시 {@code null}
      */
-    public static String extractChannelIdFromUrl(String url) {
-        if (url == null) return null;
+    public static String extractChannelIdFromUrl(String url) throws Exception {
+        if (url == null) throw new IllegalArgumentException("url is null");
 
-        try {
-            URI uri = new URI(url);
-            String path = uri.getPath();
-            if (path == null) return null;
+        URI uri = URI.create(url);
+        String path = uri.getPath();
 
-            String[] segments = path.split("/");
-            for (String segment : segments) {
-                if (!segment.isBlank()) {
-                    return segment;
-                }
-            }
-        } catch (Exception e) {
-            return null;
+        if (path.matches("^/live/[a-f0-9]{32}$")) {
+            return path.substring(path.lastIndexOf("/") + 1);
         }
 
-        return null;
+        if (path.matches("^/[a-f0-9]{32}$")) {
+            return path.substring(1);
+        }
+
+        throw new NotSupportedUrlException(null);
     }
 }

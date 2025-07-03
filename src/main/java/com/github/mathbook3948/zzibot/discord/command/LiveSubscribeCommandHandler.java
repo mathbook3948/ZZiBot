@@ -84,7 +84,6 @@ public class LiveSubscribeCommandHandler {
                 );
     }
 
-
     @Transactional
     public String handletransactional(ChatInputInteractionEvent event) throws Exception {
         String url = event.getOption("url")
