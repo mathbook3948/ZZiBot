@@ -45,7 +45,9 @@ create table chzzk_live_status
 
 create table live_alarm_channel
 (
-    channel_id varchar(64) not null,
+    channel_id varchar(64) not null
+        constraint unique_channel_id
+            unique,
     guild_id   varchar(64) not null,
     primary key (channel_id, guild_id)
 );
@@ -70,3 +72,10 @@ create index idx_live_subscription_channel_id
 create index idx_live_subscription_guild_id
     on live_subscription (guild_id);
 
+CREATE TABLE exception_log (
+                               exception_idx SERIAL,
+                               exception_content TEXT,
+                               exception_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                               exception_class varchar(255),
+                               PRIMARY KEY (exception_idx)
+)
