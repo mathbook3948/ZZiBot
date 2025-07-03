@@ -72,10 +72,14 @@ create index idx_live_subscription_channel_id
 create index idx_live_subscription_guild_id
     on live_subscription (guild_id);
 
-CREATE TABLE exception_log (
-                               exception_idx SERIAL,
-                               exception_content TEXT,
-                               exception_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                               exception_class varchar(255),
-                               PRIMARY KEY (exception_idx)
-)
+CREATE TABLE admin (
+                       admin_id varchar(50) NOT NULL,
+                       admin_name varchar(255) NOT NULL,
+                       admin_password varchar NOT NULL,
+                       admin_refreshtoken varchar,
+                       admin_is_enable boolean DEFAULT true,
+                       admin_created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+                       admin_updated_at timestamp,
+                       admin_is_superadmin boolean DEFAULT false,
+                       PRIMARY KEY (admin_id)
+);

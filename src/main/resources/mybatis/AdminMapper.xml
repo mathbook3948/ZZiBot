@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.github.mathbook3948.zzibot.mapper.AdminMapper">
+    <select id="selectAdminDetail" parameterType="AdminDTO" resultType="AdminDTO">
+        SELECT
+            a.admin_id,
+            a.admin_name,
+            a.admin_password,
+            a.admin_refreshtoken,
+            a.admin_is_enable,
+            a.admin_created_at,
+            a.admin_updated_at,
+            a.admin_is_superadmin
+        FROM admin a
+        WHERE a.admin_id = #{admin_id}
+    </select>
+
+    <insert id="updateRefreshToken" parameterType="AdminDTO">
+        UPDATE admin
+        SET admin_refreshtoken = #{admin_refreshtoken}
+        WHERE admin_id = #{admin_id}
+    </insert>
+</mapper>

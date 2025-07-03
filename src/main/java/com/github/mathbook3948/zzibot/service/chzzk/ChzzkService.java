@@ -1,11 +1,9 @@
-package com.github.mathbook3948.zzibot.service;
+package com.github.mathbook3948.zzibot.service.chzzk;
 
 import com.github.mathbook3948.zzibot.job.CheckChzzkLiveStatusJob;
 import com.github.mathbook3948.zzibot.mapper.LiveSubscriptionMapper;
 import jakarta.annotation.PostConstruct;
 import org.quartz.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
