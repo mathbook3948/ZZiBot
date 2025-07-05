@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.github.mathbook3948.zzibot.mapper.DiscordGuildMapper">
+    <insert id="insertDiscordGuildMapper" parameterType="DiscordGuildDTO">
+        INSERT INTO discord_guild (guild_id, guild_name)
+        VALUES (#{guild_id}, #{guild_name})
+    </insert>
+
+    <update id="updateDiscordGuildMapper" parameterType="DiscordGuildDTO">
+       UPDATE discord_guild
+            SET discord_guild_updated_time = CURRENT_TIMESTAMP
+                <if test="deleted != null">
+                    ,deleted = #{deleted}::boolean
+                </if>
+                <if test="guild_name != null and guild_name != ''">
+                    ,guild_name = #{guild_name}
+                </if>
+       WHERE guild_id = #{guild_id}
+    </update>
+
+    <select id="selectDiscordGuildMapper" parameterType="DiscordGuildDTO" resultType="DiscordGuildDTO">
+        SELECT
+            idx,
+            guild_id,
+            guild_name,
+            deleted,
+            discord_guild_created_time,
+            discord_guild_updated_time
+        FROM discord_guild
+        WHERE guild_id = #{guild_id}
+    </select>
+
+    <select id="selectDiscordGuildMapperNotDeleted" parameterType="DiscordGuildDTO" resultType="DiscordGuildDTO">
+        SELECT
+            idx,
+            guild_id,
+            guild_name,
+            deleted,
+            discord_guild_created_time,
+            discord_guild_updated_time
+        FROM discord_guild
+        WHERE guild_id = #{guild_id}
+            AND deleted != true
+    </select>
+</mapper>
