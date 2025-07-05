@@ -11,4 +11,4 @@ if docker ps -a --format '{{.Names}}' | grep -q '^zzibot$'; then
   docker rm zzibot --force
 fi
 
-docker run -d --name zzibot -p 8080:8080 zzibot-app
+docker run -d --name zzibot -p 443:8080 zzibot-app
