@@ -1,6 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
+if [[ -z "${KEYSTORE_FILE_HOME:-}" || ! -f "$KEYSTORE_FILE_HOME" ]]; then
+  echo "Error: KEYSTORE_FILE_HOME not set or file does not exist: $KEYSTORE_FILE_HOME" >&2
+  exit 1
+fi
+
 cd ${ZZIBOT_HOME}
 
 git pull
@@ -11,4 +16,4 @@ if docker ps -a --format '{{.Names}}' | grep -q '^zzibot$'; then
   docker rm zzibot --force
 fi
 
-docker run -d --name zzibot -p 443:8080 zzibot-app
+docker run -d --name zzibot -p 443:443 -v "$KEYSTORE_FILE_HOME":/keystore zzibot-app
