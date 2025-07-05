@@ -97,3 +97,17 @@ create table discord_log
     discord_log_user_id    varchar(255),
     discord_log_user_tag   varchar(255)
 );
+
+CREATE TABLE discord_guild (
+                               idx SERIAL,
+                               guild_id VARCHAR(64),
+                                guild_name VARCHAR(255),
+                               deleted BOOLEAN DEFAULT FALSE,
+                               discord_guild_created_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                               discord_guild_updated_time TIMESTAMP,
+                               PRIMARY KEY (idx)
+);
+
+CREATE UNIQUE INDEX uq_guild_id_when_deleted_false
+    ON discord_guild (guild_id)
+    WHERE deleted = false;
