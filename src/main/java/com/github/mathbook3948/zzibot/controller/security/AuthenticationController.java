@@ -15,7 +15,7 @@ public class AuthenticationController {
     @Autowired
     private AuthService authService;
 
-    @PostMapping("/login")
+    @PostMapping("/admin/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO params) {
         return ResponseEntity.ok(authService.login(params));
     }
