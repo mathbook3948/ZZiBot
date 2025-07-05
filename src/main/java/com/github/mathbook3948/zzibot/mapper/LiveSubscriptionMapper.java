@@ -21,4 +21,6 @@ public interface LiveSubscriptionMapper {
 
     void deleteLiveSubscriptionWithChannelId(Map<String, Object> params) throws Exception;
 
+    int selectLiveSubscriptionCount() throws Exception;
+
 }

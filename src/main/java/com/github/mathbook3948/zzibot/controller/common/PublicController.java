@@ -28,4 +28,10 @@ public class PublicController {
     public ResponseEntity<String> dbStatus() {
         return ResponseEntity.ok("OK: " + publicService.now());
     }
+
+    @Operation(summary = "메인 화면 데이터 조회", description = "메인 화면 데이터 조회")
+    @GetMapping("/main")
+    public ResponseEntity<?> getMainContent() {
+        return ResponseEntity.ok(publicService.getMainData());
+    }
 }

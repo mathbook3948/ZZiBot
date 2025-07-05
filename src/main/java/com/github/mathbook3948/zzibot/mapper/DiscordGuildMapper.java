@@ -15,4 +15,6 @@ public interface DiscordGuildMapper {
     List<DiscordGuildDTO> selectDiscordGuildMapper(DiscordGuildDTO params) throws Exception;
 
     void updateDiscordGuildMapper(DiscordGuildDTO params) throws Exception;
+
+    int selectDiscordGuildNotDeletedCount() throws Exception;
 }

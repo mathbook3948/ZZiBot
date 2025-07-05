@@ -45,4 +45,11 @@
         WHERE guild_id = #{guild_id}
             AND deleted != true
     </select>
+
+    <select id="selectDiscordGuildNotDeletedCount">
+        SELECT
+        COUNT(*)
+        FROM discord_guild
+        WHERE deleted = false
+    </select>
 </mapper>

@@ -53,4 +53,10 @@
         DELETE FROM live_subscription
         WHERE guild_id = #{guildId} AND channel_id = #{channelId}
     </delete>
+
+    <select id="selectLiveSubscriptionCount">
+        SELECT
+            COUNT(*)
+        FROM live_subscription
+    </select>
 </mapper>
