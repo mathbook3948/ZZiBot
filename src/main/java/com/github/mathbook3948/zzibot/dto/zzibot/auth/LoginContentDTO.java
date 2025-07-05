@@ -7,6 +7,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LoginContentDTO implements ResponseContent {
+    private String id;
     private String accessToken;
     private String refreshToken;
 }

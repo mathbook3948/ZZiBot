@@ -57,6 +57,7 @@ public class AuthService {
             LoginContentDTO content = new LoginContentDTO();
             content.setAccessToken(accessToken);
             content.setRefreshToken(refreshToken);
+            content.setId(userDetails.getUsername());
 
             result.setContent(content);
             result.setResult(true);
