@@ -14,7 +14,7 @@ public class DeleteLiveSubscriptionRegister extends AbstractCommandRegistrar{
 
     private final String NAME = "알림해제";
 
-    private final String DESCRIPTION = "치지직 라이브 알림을 해제할 채널을 선택합니다.";
+    private final String DESCRIPTION = "선택한 채널의 치지직 라이브 알림을 해제합니다.";
     
     private final Integer TYPE = 1;
 
