@@ -21,12 +21,23 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 public class SecurityConfig {
 
+    private final String[] PUBLIC_ENDPOINTS = {
+            "/v3/api-docs/**",
+            "/swagger-ui.html",
+            "/swagger-ui/**"
+    };
+
+    private final String[] ADMIN_ENDPOINTS = {
+            "/admin/**"
+    };
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .requestMatchers(ADMIN_ENDPOINTS).hasAuthority("ADMIN")
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
