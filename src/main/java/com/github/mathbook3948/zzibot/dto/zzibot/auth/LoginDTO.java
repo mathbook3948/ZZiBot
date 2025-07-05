@@ -1,4 +1,4 @@
-package com.github.mathbook3948.zzibot.dto.zzibot;
+package com.github.mathbook3948.zzibot.dto.zzibot.auth;
 
 import lombok.Getter;
 import lombok.Setter;
